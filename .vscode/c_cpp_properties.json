@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerArgs": [
+                "-D",
+                "USE_STDPERIPH_DRIVER",
+                "-D",
+                "STM32F10X_MD",
+                "-D",
+                "USE_FULL_ASSERT"
+            ]
+        }
+    ],
+    "version": 4
+}

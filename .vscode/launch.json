@@ -1,0 +1,45 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/target.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb-multiarch",
+            "targetArchitecture": "arm",
+            "preLaunchTask": "openocd",
+            "setupCommands": [
+                {
+                    "description": "target.elf",
+                    "text": "file ${workspaceFolder}/build/target.elf",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "connect to openocd",
+                    "text": "target remote localhost:3333",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "reset & halt",
+                    "text": "monitor reset halt",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "load",
+                    "text": "load",
+                    "ignoreFailures": false
+                }
+            ]
+        }
+    ]
+}
