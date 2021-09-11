@@ -4,7 +4,7 @@
 #include "stm32f10x.h"
 
 void ILI9341_init();
-void addr_set();
-void send_color(u8 red, u8 green, u8 blue);
+void commit_display();
+void set_pixel(u8 y, u16 color);
 
 #endif
