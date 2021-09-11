@@ -31,22 +31,74 @@ static void send_via_spi(u8 data, BitAction dc) {
     GPIO_WriteBit(GPIOA, CS, Bit_SET);
 }
 
-#define send_command(cmd) send_via_spi(cmd, Bit_RESET)
-#define send_data(data) send_via_spi(data, Bit_SET)
+#define send_command(cmd) send_via_spi((cmd), Bit_RESET)
+#define send_data(data) send_via_spi((data), Bit_SET)
 
 /**
- * red:     0-31
- * green:   0-63
- * blue:    0-31
+ *    y
+ *    ^
+ * 239|
+ *    |
+ *    |
+ *    |
+ *    |
+ *    0-------------------------> x
+ *                            319
  */
-void send_color(u8 red, u8 green, u8 blue) {
-    send_data((red << 3) | (green >> 3));
-    send_data((green << 5) | blue);
+static u16 display_ram[240];
+static u16 x = 0;
+
+/**
+ * @param y 0 <= y <= 239
+ * @param color
+ *        red    green    blue
+ * bits   5       6       5
+ */
+void set_pixel(u8 y, u16 color) {
+    display_ram[y] = color;
+}
+
+static void set_background() {
+    u32* p = display_ram;
+    if (x != 0 && x != 160 && x != 319) {
+        // all black
+        for (u8 i = 0; i < 120; i++) {
+            p[i] = 0;
+        }
+        display_ram[120] = 0xffff;
+        if (x % 10 != 0) {
+            display_ram[0] = display_ram[239] = 0xffff;
+        } else {
+            p[0] = p[1] = p[2] = p[119] = p[118] = p[117] = 0xffffffff;
+        }
+        if (x < 6 || x > 313) {
+            for (u8 y = 10; y < 239; y += 10) {
+                display_ram[y] = 0xffff;
+            }
+        }
+    } else {
+        // y = 0 or 160 or 319, all white
+        for (u8 i = 0; i < 120; i++) {
+            p[i] = 0xffffffff;
+        }
+    }
+}
+
+void commit_display() {
+    for (u8 y = 0; y < 240; y++) {
+        send_data((u8)(display_ram[y] >> 8));
+        send_data((u8)display_ram[y]);
+    }
+    x++;
+    if (x == 320) {
+        x = 0;
+    }
+    set_background();
 }
 
 void ILI9341_init() {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
-    GPIO_WriteBit(GPIOB, RESET, Bit_RESET);
+
     GPIO_Init(GPIOA, &(GPIO_InitTypeDef){
                          .GPIO_Pin = DC,
                          .GPIO_Mode = GPIO_Mode_Out_PP,
@@ -57,9 +109,13 @@ void ILI9341_init() {
                          .GPIO_Mode = GPIO_Mode_Out_PP,
                          .GPIO_Speed = GPIO_Speed_2MHz,
                      });
+
+    GPIO_WriteBit(GPIOB, RESET, Bit_RESET);
     systick_delay_us(10000);
     GPIO_WriteBit(GPIOB, RESET, Bit_SET);
+
     systick_delay_us(50000);
+
     send_command(0x11);
     send_data(0x00);
 
@@ -115,7 +171,7 @@ void ILI9341_init() {
     send_data(0X55);
 
     send_command(0x36);
-    send_data(0x48);  //竖屏参数
+    send_data(0x48);
 
     send_command(0xB1);
     send_data(0X00);
@@ -166,9 +222,8 @@ void ILI9341_init() {
     send_data(0X0F);
 
     send_command(0x29);
-}
 
-void addr_set() {
+    // set addr
     send_command(0x2a);
     send_data(0x00);
     send_data(0x00);
@@ -176,4 +231,6 @@ void addr_set() {
     send_data(0x00);
     send_data(0x00);
     send_command(0x2c);
+
+    set_background();
 }
