@@ -25,7 +25,8 @@ void spi_init() {
                                          .GPIO_Mode = GPIO_Mode_IN_FLOATING});
 
     SPI_Init(SPI1, &(SPI_InitTypeDef){
-                       .SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4,
+                       .SPI_BaudRatePrescaler =
+                           SPI_BaudRatePrescaler_4,  // 56 / 4 = 14MHz < 18MHz
                        .SPI_CPOL = 0,
                        .SPI_CPHA = 0,
                        .SPI_DataSize = SPI_DataSize_8b,
