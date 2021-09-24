@@ -13,7 +13,7 @@ void adc_init() {
                      });
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-    RCC_ADCCLKConfig(RCC_PCLK2_Div6);  // 72M / 6 = 12M
+    RCC_ADCCLKConfig(RCC_PCLK2_Div4);  // 56M / 4 = 14M
     ADC_Init(ADC1, &(ADC_InitTypeDef){
                        .ADC_Mode = ADC_Mode_Independent,
                        .ADC_ScanConvMode = DISABLE,
@@ -22,7 +22,22 @@ void adc_init() {
                        .ADC_DataAlign = ADC_DataAlign_Right,
                        .ADC_NbrOfChannel = 1,
                    });
-    ADC_RegularChannelConfig(ADC1, channel, 1, ADC_SampleTime_55Cycles5);
+    /**
+     * Clock = 14MHz
+     * 
+     * T_conv = Sample Time + 12.5 cycles
+     * 
+     * Sample Time/cycles      Total/cycles       T/us
+     *       1.5                    14             1
+     *       7.5                    20             1.43
+     *      13.5                    26             1.86
+     *      28.5                    41             2.93
+     *      41.5                    54             3.86
+     *      55.5                    68             4.86
+     *      71.5                    84             6
+     *     239.5                   252            18
+     */
+    ADC_RegularChannelConfig(ADC1, channel, 1, ADC_SampleTime_71Cycles5);
     ADC_Cmd(ADC1, ENABLE);
 
     ADC_ResetCalibration(ADC1);

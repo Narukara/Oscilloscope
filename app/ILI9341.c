@@ -65,16 +65,14 @@ static void set_background() {
         for (u8 i = 0; i < 120; i++) {
             p[i] = 0;
         }
+        for (u8 y = 24; y < 239; y += 24) {
+            display_ram[y] = 0x4208;
+        }
         display_ram[120] = 0xffff;
         if (x % 10 != 0) {
             display_ram[0] = display_ram[239] = 0xffff;
         } else {
             p[0] = p[1] = p[2] = p[119] = p[118] = p[117] = 0xffffffff;
-        }
-        if (x < 6 || x > 313) {
-            for (u8 y = 10; y < 239; y += 10) {
-                display_ram[y] = 0xffff;
-            }
         }
     } else {
         // y = 0 or 160 or 319, all white

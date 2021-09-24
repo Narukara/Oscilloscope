@@ -21,7 +21,7 @@ int main() {
     for (u16 i = 0; i < 320; i++) {
         commit_display();
     }
-    SysTick->LOAD = 9 * 10000;  // 10 ms
+    SysTick->LOAD = 7 * 10000;  // 10 ms
     SysTick->VAL = 0;           // clear
     SysTick->CTRL = 0x03;       // enable
 
@@ -40,6 +40,7 @@ static u8 _255_to_239(u8 num) {
 void SysTick_Handler(void) {
     set_pixel(_255_to_239(adc_read() >> 4), 0x001f);
     commit_display();
+    // uart_send_bit(0x60);
 }
 
 #ifdef USE_FULL_ASSERT
