@@ -3,6 +3,7 @@
 #include "stm32f10x_spi.h"
 #include "stm32f10x_usart.h"
 
+#include "GUI.h"
 #include "ILI9341.h"
 #include "adc.h"
 #include "spi.h"
@@ -18,9 +19,13 @@ int main() {
     adc_init();
     spi_init();
     ILI9341_init();
-    for (u16 i = 0; i < 320; i++) {
-        commit_display();
+    GUI_init();
+
+    while (1) {
+        __DSB();
+        __WFI();
     }
+
     SysTick->LOAD = 7 * 10000;  // 10 ms
     SysTick->VAL = 0;           // clear
     SysTick->CTRL = 0x03;       // enable
@@ -31,16 +36,14 @@ int main() {
     }
 }
 
-static u8 _255_to_239(u8 num) {
-    u16 temp = num * 478 / 255;
+static u8 _255_to_200(u8 num) {
+    u16 temp = num * 400 / 255;
     temp += temp & 0x01;
     return temp >> 1;
 }
 
 void SysTick_Handler(void) {
-    set_pixel(_255_to_239(adc_read() >> 4), 0x001f);
-    commit_display();
-    // uart_send_bit(0x60);
+
 }
 
 #ifdef USE_FULL_ASSERT
