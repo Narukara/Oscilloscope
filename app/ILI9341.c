@@ -111,6 +111,7 @@ void ILI9341_begin_write() {
 }
 
 /**
+ * @brief Remember to call ILI9341_begin_write() first
  * @param color
  *        red    green    blue
  * bits   5       6       5
@@ -120,6 +121,7 @@ void ILI9341_set_pixel(u16 color) {
 }
 
 /**
+ * @brief Remember to call ILI9341_begin_write() first
  * @param color pointer to pixel(color) array
  * @param num   number of pixels
  *        red    green    blue
