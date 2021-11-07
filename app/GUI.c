@@ -1,22 +1,24 @@
 #include "ILI9341.h"
 #include "font.h"
+#include "status.h"
 
 // colors
-#define WHITE 0xffff
-#define GREY 0x4208
-#define BLACK 0x0000
-#define RED 0xf800
-#define BLUE 0x001f
-#define GREEN 0x07e0
-#define MAGENTA 0xf81f
-#define YELLOW 0xffe0
-#define CYAN 0x07ff
+#define WHITE (0xffff)
+#define GREY (0x4208)
+#define BLACK (0x0000)
+#define RED (0xf800)
+#define BLUE (0x001f)
+#define GREEN (0x07e0)
+#define MAGENTA (0xf81f)
+#define YELLOW (0xffe0)
+#define CYAN (0x07ff)
 
 #define MOD_METHOD
 
 /**
  * @param x 0-319
  * @param y 0-200
+ * @return color of gird
  */
 static u16 get_grid(u16 x, u16 y) {
 #ifdef MOD_METHOD
@@ -36,6 +38,17 @@ static u16 get_grid(u16 x, u16 y) {
 #endif
 }
 
+/**
+ *   0
+ * ...
+ *  18
+ *  19 --------------------
+ * ... |       grid       |
+ * 219 --------------------
+ * 220
+ * ...
+ * 239
+ */
 static void display_grid() {
     ILI9341_set_y(19, 219);
     ILI9341_set_x(0, 319);
@@ -76,7 +89,7 @@ static void display_char(u16 offset_x,
             if (temp & 0x01) {
                 ILI9341_set_pixel(color);
             } else {
-                ILI9341_set_pixel(0x0000);
+                ILI9341_set_pixel(BLACK);
             }
             temp >>= 1;
         }
@@ -84,9 +97,39 @@ static void display_char(u16 offset_x,
 }
 
 /**
+ * Recommend
+ * Optimized specifically for this app
+ */
+static void display_multi_char_8_16(u16 offset_x,
+                                    u16 offset_y,
+                                    const u8** font,
+                                    u8 num,
+                                    u16 color) {
+    ILI9341_set_y(offset_y, offset_y + 15);
+    ILI9341_set_x(offset_x, offset_x + (num << 3) - 1);
+    ILI9341_begin_write();
+    for (u8 i = 0; i < num; i++) {
+        for (u8 j = 0; j < 16; j++) {
+            u8 temp = font[i][j];
+            for (u8 k = 0; k < 8; k++) {
+                if (temp & 0x01) {
+                    ILI9341_set_pixel(color);
+                } else {
+                    ILI9341_set_pixel(BLACK);
+                }
+                temp >>= 1;
+            }
+        }
+    }
+}
+
+/**
+ * @brief This function will record the last waveform (the pointer), and clear
+ * the previous one when the next waveform is displayed. Pay attention to
+ * protecting the last data when using this function.
  * @param data length = 320, range 0-200
  */
-static void display_waveform(const u8* data) {
+void GUI_display_waveform(const u8* data) {
     static const u8* last_data = 0;
     ILI9341_set_y(0, 0xEF);
     ILI9341_set_x(0, 0x13F);
@@ -113,16 +156,152 @@ static void display_waveform(const u8* data) {
     last_data = data;
 }
 
+#define BOTTOM_Y 222
+
+void GUI_display_v_sen(v_sen_t v_sen) {
+    const u8* fonts[3];
+    if (v_sen <= V0_5) {
+        fonts[0] = font_num_8_16[0];
+        fonts[1] = font_dot_8_16;
+        fonts[2] = font_num_8_16[v_sen];
+    } else {
+        fonts[0] = font_null_8_16;
+        fonts[1] = font_null_8_16;
+        fonts[2] = font_num_8_16[v_sen >> 3];
+    }
+    display_multi_char_8_16(0, BOTTOM_Y, fonts, 3, YELLOW);
+}
+
+void GUI_display_coupling_method(coupling_t coupling) {
+    const u8* fonts[3];
+    switch (coupling) {
+        case DC_coupling:
+            fonts[0] = font_D_8_16;
+            fonts[1] = font_C_8_16;
+            fonts[2] = font_null_8_16;
+            break;
+        case AC_coupling:
+            fonts[0] = font_A_8_16;
+            fonts[1] = font_C_8_16;
+            fonts[2] = font_null_8_16;
+            break;
+        case GND_coupling:
+            fonts[0] = font_G_8_16;
+            fonts[1] = font_N_8_16;
+            fonts[2] = font_D_8_16;
+            break;
+    }
+    display_multi_char_8_16(40, BOTTOM_Y, fonts, 3, YELLOW);
+}
+
+void GUI_display_time_base(time_base_t time_base) {
+    const u8* fonts[4];
+    if (time_base & 0x01) {
+        // ms
+        fonts[3] = font_m_8_16;
+    } else {
+        // us
+        fonts[3] = font_u_8_16;
+    }
+    if (time_base & 0x02) {
+        // one 0
+        fonts[2] = font_num_8_16[0];
+        fonts[1] = font_num_8_16[time_base >> 4];
+        fonts[0] = font_null_8_16;
+    } else if (time_base & 0x04) {
+        // two 0
+        fonts[2] = font_num_8_16[0];
+        fonts[1] = font_num_8_16[0];
+        fonts[0] = font_num_8_16[time_base >> 4];
+    } else {
+        // no 0
+        fonts[2] = font_num_8_16[time_base >> 4];
+        fonts[1] = font_null_8_16;
+        fonts[0] = font_null_8_16;
+    }
+    display_multi_char_8_16(280, BOTTOM_Y, fonts, 4, BLUE);
+}
+
+#define TOP_Y 1
+
+void GUI_display_mode(mode_t mode) {
+    const u8* fonts[4];
+    switch (mode) {
+        case ROLL:
+            fonts[0] = font_R_8_16;
+            fonts[1] = font_O_8_16;
+            fonts[2] = font_L_8_16;
+            fonts[3] = font_L_8_16;
+            break;
+        case AUTO:
+            fonts[0] = font_A_8_16;
+            fonts[1] = font_U_8_16;
+            fonts[2] = font_T_8_16;
+            fonts[3] = font_O_8_16;
+            break;
+        case NORMAL:
+            fonts[0] = font_N_8_16;
+            fonts[1] = font_O_8_16;
+            fonts[2] = font_R_8_16;
+            fonts[3] = font_M_8_16;
+            break;
+        case SINGLE:
+            fonts[0] = font_S_8_16;
+            fonts[1] = font_I_8_16;
+            fonts[2] = font_N_8_16;
+            fonts[3] = font_G_8_16;
+            break;
+    }
+    display_multi_char_8_16(0, TOP_Y, fonts, 4, CYAN);
+}
+
+void GUI_display_trigger(trigger_t trigger) {
+    if (trigger == riging_edge) {
+        display_char(40, TOP_Y, 16, 16, font_rising_16_16, CYAN);
+    } else {
+        display_char(40, TOP_Y, 16, 16, font_falling_16_16, CYAN);
+    }
+}
+
+void GUI_display_status(status_t status) {
+    const u8* fonts[4];
+    u16 color;
+    if (status == RUN) {
+        fonts[0] = font_null_8_16;
+        fonts[1] = font_R_8_16;
+        fonts[2] = font_U_8_16;
+        fonts[3] = font_N_8_16;
+        color = GREEN;
+    } else {
+        fonts[0] = font_H_8_16;
+        fonts[1] = font_O_8_16;
+        fonts[2] = font_L_8_16;
+        fonts[3] = font_D_8_16;
+        color = RED;
+    }
+    display_multi_char_8_16(288, TOP_Y, fonts, 4, color);
+}
+
+/**
+ * @brief display all fixed things
+ */
 void GUI_init() {
+    // display Black border
+    ILI9341_set_y(0, 18);
+    ILI9341_set_x(0, 319);
+    ILI9341_begin_write();
+    for (u16 i = 0; i < 19 * 320; i++) {
+        ILI9341_set_pixel(BLACK);
+    }
+    ILI9341_set_y(220, 239);
+    ILI9341_begin_write();
+    for (u16 i = 0; i < 20 * 320; i++) {
+        ILI9341_set_pixel(BLACK);
+    }
+    // display fixed UIs
     display_grid();
-    display_char(0, 224, 8, 16, font_num_8_16[0], YELLOW);
-    display_char(8, 224, 8, 16, font_num_8_16[1], YELLOW);
-    display_char(16, 224, 8, 16, font_num_8_16[2], YELLOW);
-    display_char(24, 224, 8, 16, font_num_8_16[3], YELLOW);
-    display_char(32, 224, 8, 16, font_num_8_16[4], YELLOW);
-    display_char(40, 224, 8, 16, font_num_8_16[5], YELLOW);
-    display_char(48, 224, 8, 16, font_num_8_16[6], YELLOW);
-    display_char(56, 224, 8, 16, font_num_8_16[7], YELLOW);
-    display_char(64, 224, 8, 16, font_num_8_16[8], YELLOW);
-    display_char(72, 224, 8, 16, font_num_8_16[9], YELLOW);
+    display_char(24, BOTTOM_Y, 8, 16, font_V_8_16,
+                 YELLOW);  // part of v_sen
+    display_char(312, BOTTOM_Y, 8, 16, font_s_8_16,
+                 BLUE);  // part of time base
 }
