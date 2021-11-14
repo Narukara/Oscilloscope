@@ -1,14 +1,21 @@
-#include "stm32f10x_adc.h"
+#include "stm32f10x_exti.h"
 #include "stm32f10x_gpio.h"
 
+#include "adc.h"
 #include "status.h"
 
-static status_t status = HOLD;
+u8 status_255_to_200(u8 num) {
+    u16 temp = num * 400 / 255;
+    temp += temp & 0x01;
+    return temp >> 1;
+}
+
+static status_t status = RUN;
 status_t status_get_status() {
     return status;
 }
 
-static mode_t mode = ROLL;
+static mode_t mode = NORMAL;
 mode_t status_get_mode() {
     return mode;
 }
@@ -17,7 +24,7 @@ mode_t status_get_mode() {
  * real time
  */
 coupling_t status_get_coupling_method() {
-    return GND_coupling;  // stub
+    return DC_coupling;  // stub
 }
 
 /**
@@ -40,10 +47,10 @@ trigger_t status_get_trigger_mode() {
  * @return trigger level 0-255
  */
 u8 status_get_trigger_level() {
-    return 127;  // stub
+    return adc2_read() >> 4;
 }
 
-static time_base_t time_base = ms200;
+static time_base_t time_base = ms20;
 time_base_t status_get_time_base() {
     return time_base;
 }

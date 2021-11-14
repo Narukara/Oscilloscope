@@ -1,4 +1,4 @@
-CC = arm-none-eabi-gcc -mthumb -mcpu=cortex-m3 -g -Wall -Wextra -O1
+CC = arm-none-eabi-gcc -mthumb -mcpu=cortex-m3 -g -Wall -Wextra -O2
 LINK = -specs=nano.specs -specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=build/target.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group
 SRC = *.c lib/*.c app/*.c
 HEAD = *.h lib/*.h app/*.h
@@ -6,7 +6,8 @@ INC = -I . -I lib -I app
 PWD = $(shell pwd)
 # 使用不同芯片：更改LD, MACRO, DEVICE, STARTUP
 LD = -T lib/stm32_flash_md.ld
-MACRO = -D USE_STDPERIPH_DRIVER -D STM32F10X_MD -D USE_FULL_ASSERT
+MACRO = -D USE_STDPERIPH_DRIVER -D STM32F10X_MD
+# -D USE_FULL_ASSERT
 DEVICE = target/stm32f1x.cfg
 STARTUP = lib/startup_stm32f10x_md.s
 

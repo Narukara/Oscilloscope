@@ -1,25 +1,15 @@
 #include "stm32f10x_gpio.h"
-#include "stm32f10x_rcc.h"
 
 #include "spi.h"
 #include "systick.h"
 
 // GPIOA
+#define RESET GPIO_Pin_2
+#define DC GPIO_Pin_3
 #define CS GPIO_Pin_4
-#define DC GPIO_Pin_8
-// GPIOB
-#define RESET GPIO_Pin_0
 
 /**
- * SPI1
- * PA4  CS
- * PA5  SCLK
- * PA6  MISO
- * PA7  MOSI
- */
-
-/**
- * PA8 D/C
+ * PA3 D/C
  * 1 data
  * 0 command
  */
@@ -151,29 +141,27 @@ void ILI9341_set_multi_pixel(const u16* color, u8 num) {
  * below.
  */
 void ILI9341_init() {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
-
     GPIO_Init(GPIOA, &(GPIO_InitTypeDef){
                          .GPIO_Pin = DC,
                          .GPIO_Mode = GPIO_Mode_Out_PP,
                          .GPIO_Speed = GPIO_Speed_50MHz,
                      });
-    GPIO_Init(GPIOB, &(GPIO_InitTypeDef){
+    GPIO_Init(GPIOA, &(GPIO_InitTypeDef){
                          .GPIO_Pin = RESET,
                          .GPIO_Mode = GPIO_Mode_Out_PP,
                          .GPIO_Speed = GPIO_Speed_2MHz,
                      });
 
-    GPIO_WriteBit(GPIOB, RESET, Bit_RESET);
-    systick_delay_us(10000);
-    GPIO_WriteBit(GPIOB, RESET, Bit_SET);
+    GPIO_WriteBit(GPIOA, RESET, Bit_RESET);
+    systick_delay_ms(10);
+    GPIO_WriteBit(GPIOA, RESET, Bit_SET);
 
-    systick_delay_us(50000);
+    systick_delay_ms(50);
 
     // Sleep Out
     send_command(0x11);
     // wait 5ms
-    systick_delay_us(5000);
+    systick_delay_ms(5);
 
     // Power control B
     send_command(0xCF);

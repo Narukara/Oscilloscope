@@ -1,7 +1,9 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-typedef enum v_sen_t {
+#include "stm32f10x.h"
+
+typedef enum {
     V0_1 = 1,
     V0_2 = 2,
     V0_5 = 5,
@@ -10,18 +12,18 @@ typedef enum v_sen_t {
     V5 = 40,
 } v_sen_t;
 
-typedef enum coupling_t {
+typedef enum {
     GND_coupling,
     DC_coupling,
     AC_coupling,
 } coupling_t;
 
-typedef enum trigger_t {
+typedef enum {
     riging_edge,
     falling_edge,
 } trigger_t;
 
-typedef enum time_base_t {
+typedef enum {
     ms500 = 0x55,
     ms200 = 0x25,
     ms100 = 0x15,
@@ -38,18 +40,19 @@ typedef enum time_base_t {
     us20 = 0x22,
 } time_base_t;
 
-typedef enum status_t {
+typedef enum {
     RUN,
     HOLD,
 } status_t;
 
-typedef enum mode_t {
+typedef enum {
     ROLL,
     SINGLE,
     NORMAL,
     AUTO,
 } mode_t;
 
+u8 status_255_to_200(u8 num);
 status_t status_get_status();
 mode_t status_get_mode();
 coupling_t status_get_coupling_method();

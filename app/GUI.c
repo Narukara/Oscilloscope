@@ -97,8 +97,7 @@ static void display_char(u16 offset_x,
 }
 
 /**
- * Recommend
- * Optimized specifically for this app
+ * Optimized specifically for n * 8 * 16 chars
  */
 static void display_multi_char_8_16(u16 offset_x,
                                     u16 offset_y,
@@ -282,9 +281,21 @@ void GUI_display_status(status_t status) {
     display_multi_char_8_16(288, TOP_Y, fonts, 4, color);
 }
 
+#define BAR_BEGIN 110
+#define BAR_TOP_Y 4
+
 /**
- * @brief display all fixed things
+ * @param trigger_level 0~255
  */
+void GUI_display_trigger_level(u8 trigger_level) {
+    static u16 level = 0;
+    display_char(BAR_BEGIN - 2 + level, BAR_TOP_Y, 5, 8, font_null_8_16, CYAN);
+    level = trigger_level * 200 / 255;
+    level += level & 0x01;
+    level >>= 1;
+    display_char(BAR_BEGIN - 2 + level, BAR_TOP_Y, 5, 8, font_arrow_5_8, CYAN);
+}
+
 void GUI_init() {
     // display Black border
     ILI9341_set_y(0, 18);
@@ -304,4 +315,19 @@ void GUI_init() {
                  YELLOW);  // part of v_sen
     display_char(312, BOTTOM_Y, 8, 16, font_s_8_16,
                  BLUE);  // part of time base
+    // bar
+    ILI9341_set_y(BAR_TOP_Y + 9, BAR_TOP_Y + 9);
+    ILI9341_set_x(BAR_BEGIN, BAR_BEGIN + 100);
+    ILI9341_begin_write();
+    for (u16 i = 0; i < 101; i++) {
+        ILI9341_set_pixel(CYAN);
+    }
+    // display initial status
+    GUI_display_v_sen(status_get_v_sen());
+    GUI_display_coupling_method(status_get_coupling_method());
+    GUI_display_time_base(status_get_time_base());
+    GUI_display_mode(status_get_mode());
+    GUI_display_trigger(status_get_trigger_mode());
+    GUI_display_status(status_get_status());
+    GUI_display_trigger_level(status_get_trigger_level());
 }
