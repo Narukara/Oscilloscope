@@ -3,8 +3,7 @@
 #include "stm32f10x_usart.h"
 
 void uart_init() {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1,
-                           ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
     GPIO_Init(GPIOA, &(GPIO_InitTypeDef){.GPIO_Pin = GPIO_Pin_9,  // TX
                                          .GPIO_Speed = GPIO_Speed_2MHz,
