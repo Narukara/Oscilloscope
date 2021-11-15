@@ -4,12 +4,12 @@
 #include "stm32f10x.h"
 
 typedef enum {
-    V0_1 = 1,
-    V0_2 = 2,
-    V0_5 = 5,
-    V1 = 8,
-    V2 = 16,
-    V5 = 40,
+    V0_1 = 0x01,
+    V0_2 = 0x02,
+    V0_5 = 0x05,
+    V1 = 0x10,
+    V2 = 0x20,
+    V5 = 0x50,
 } v_sen_t;
 
 typedef enum {
@@ -52,7 +52,6 @@ typedef enum {
     AUTO,
 } mode_t;
 
-u8 status_255_to_200(u8 num);
 status_t status_get_status();
 mode_t status_get_mode();
 coupling_t status_get_coupling_method();

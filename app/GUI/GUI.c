@@ -13,6 +13,16 @@
 #define YELLOW (0xffe0)
 #define CYAN (0x07ff)
 
+/**
+ * Magic code!
+ * Linearly map 0-255 to 0-200, and round up
+ */
+static u8 _255_to_200(u8 num) {
+    u16 temp = num * 400 / 255;
+    temp += temp & 0x01;
+    return temp >> 1;
+}
+
 #define MOD_METHOD
 
 /**
@@ -123,12 +133,12 @@ static void display_multi_char_8_16(u16 offset_x,
 }
 
 /**
- * @brief This function will record the last waveform (the pointer), and clear
- * the previous one when the next waveform is displayed. Pay attention to
- * protecting the last data when using this function.
- * @param data length = 320, range 0-200
+ * @brief This function will record the last waveform, and clear
+ * the previous one when the next waveform is displayed.
+ * @param data length = 320, range 0-255
  */
 void GUI_display_waveform(const u8* data) {
+    // TODO, 0-255
     static const u8* last_data = 0;
     ILI9341_set_y(0, 0xEF);
     ILI9341_set_x(0, 0x13F);
@@ -166,7 +176,7 @@ void GUI_display_v_sen(v_sen_t v_sen) {
     } else {
         fonts[0] = font_null_8_16;
         fonts[1] = font_null_8_16;
-        fonts[2] = font_num_8_16[v_sen >> 3];
+        fonts[2] = font_num_8_16[v_sen >> 4];
     }
     display_multi_char_8_16(0, BOTTOM_Y, fonts, 3, YELLOW);
 }

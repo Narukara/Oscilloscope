@@ -3,6 +3,7 @@
         "stm32f10x_rcc.h": "c",
         "systick.h": "c",
         "stm32f10x_spi.h": "c",
-        "stm32f10x_usart.h": "c"
+        "stm32f10x_usart.h": "c",
+        "status.h": "c"
     }
 }
