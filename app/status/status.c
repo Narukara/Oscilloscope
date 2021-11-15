@@ -4,12 +4,6 @@
 #include "adc.h"
 #include "status.h"
 
-u8 status_255_to_200(u8 num) {
-    u16 temp = num * 400 / 255;
-    temp += temp & 0x01;
-    return temp >> 1;
-}
-
 static status_t status = RUN;
 status_t status_get_status() {
     return status;

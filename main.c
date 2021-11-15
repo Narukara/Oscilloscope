@@ -28,8 +28,10 @@
  *
  * USART1
  * ADC1
+ * ADC2
  * SPI1
  * TIM2
+ * TIM3
  */
 
 void oscilloscope_init() {
