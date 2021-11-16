@@ -9,7 +9,14 @@ status_t status_get_status() {
     return status;
 }
 
-static mode_t mode = NORMAL;
+/**
+ * set status to HOLD
+ */
+void status_set_status(){
+    status = HOLD;
+}
+
+static mode_t mode = AUTO;
 mode_t status_get_mode() {
     return mode;
 }
@@ -17,8 +24,8 @@ mode_t status_get_mode() {
 /**
  * real time
  */
-coupling_t status_get_coupling_method() {
-    return DC_coupling;  // stub
+coupling_t status_get_coupling() {
+    return AC_coupling;  // stub
 }
 
 /**
@@ -26,14 +33,14 @@ coupling_t status_get_coupling_method() {
  * real time
  */
 v_sen_t status_get_v_sen() {
-    return V0_5;  // stub
+    return V1;  // stub
 }
 
 /**
  * real time
  */
-trigger_t status_get_trigger_mode() {
-    return falling_edge;  // stub
+trigger_t status_get_trigger() {
+    return riging_edge;  // stub
 }
 
 /**
@@ -44,7 +51,7 @@ u8 status_get_trigger_level() {
     return adc2_read() >> 4;
 }
 
-static time_base_t time_base = ms20;
+static time_base_t time_base = us100;
 time_base_t status_get_time_base() {
     return time_base;
 }

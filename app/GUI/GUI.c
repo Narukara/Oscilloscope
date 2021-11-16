@@ -138,31 +138,34 @@ static void display_multi_char_8_16(u16 offset_x,
  * @param data length = 320, range 0-255
  */
 void GUI_display_waveform(const u8* data) {
-    // TODO, 0-255
-    static const u8* last_data = 0;
+    static u8 last_data[320] = {0xff};  // 0-200
+    if (status_get_status() == HOLD) {
+        return;
+    }
     ILI9341_set_y(0, 0xEF);
     ILI9341_set_x(0, 0x13F);
-    if (last_data) {
+    if (last_data[0] != 0xff) {
         // clear last waveform, display persent
         for (u16 t = 0; t < 320; t++) {
             ILI9341_set_y_begin(219 - last_data[t]);
             ILI9341_set_x_begin(t);
             ILI9341_begin_write();
             ILI9341_set_pixel(get_grid(t, 200 - last_data[t]));
-            ILI9341_set_y_begin(219 - data[t]);
+            last_data[t] = _255_to_200(data[t]);
+            ILI9341_set_y_begin(219 - last_data[t]);
             ILI9341_begin_write();
             ILI9341_set_pixel(YELLOW);
         }
     } else {
-        // last_data = 0, initial waveform
+        // initial waveform
         for (u16 t = 0; t < 320; t++) {
-            ILI9341_set_y_begin(219 - data[t]);
+            last_data[t] = _255_to_200(data[t]);
+            ILI9341_set_y_begin(219 - last_data[t]);
             ILI9341_set_x_begin(t);
             ILI9341_begin_write();
             ILI9341_set_pixel(YELLOW);
         }
     }
-    last_data = data;
 }
 
 #define BOTTOM_Y 222
@@ -181,7 +184,7 @@ void GUI_display_v_sen(v_sen_t v_sen) {
     display_multi_char_8_16(0, BOTTOM_Y, fonts, 3, YELLOW);
 }
 
-void GUI_display_coupling_method(coupling_t coupling) {
+void GUI_display_coupling(coupling_t coupling) {
     const u8* fonts[3];
     switch (coupling) {
         case DC_coupling:
@@ -205,26 +208,26 @@ void GUI_display_coupling_method(coupling_t coupling) {
 
 void GUI_display_time_base(time_base_t time_base) {
     const u8* fonts[4];
-    if (time_base & 0x01) {
+    if (time_base & 0x10) {
         // ms
         fonts[3] = font_m_8_16;
     } else {
         // us
         fonts[3] = font_u_8_16;
     }
-    if (time_base & 0x02) {
+    if (time_base & 0x20) {
         // one 0
         fonts[2] = font_num_8_16[0];
-        fonts[1] = font_num_8_16[time_base >> 4];
+        fonts[1] = font_num_8_16[time_base & 0x0f];
         fonts[0] = font_null_8_16;
-    } else if (time_base & 0x04) {
+    } else if (time_base & 0x40) {
         // two 0
         fonts[2] = font_num_8_16[0];
         fonts[1] = font_num_8_16[0];
-        fonts[0] = font_num_8_16[time_base >> 4];
+        fonts[0] = font_num_8_16[time_base & 0x0f];
     } else {
         // no 0
-        fonts[2] = font_num_8_16[time_base >> 4];
+        fonts[2] = font_num_8_16[time_base & 0x0f];
         fonts[1] = font_null_8_16;
         fonts[0] = font_null_8_16;
     }
@@ -332,12 +335,4 @@ void GUI_init() {
     for (u16 i = 0; i < 101; i++) {
         ILI9341_set_pixel(CYAN);
     }
-    // display initial status
-    GUI_display_v_sen(status_get_v_sen());
-    GUI_display_coupling_method(status_get_coupling_method());
-    GUI_display_time_base(status_get_time_base());
-    GUI_display_mode(status_get_mode());
-    GUI_display_trigger(status_get_trigger_mode());
-    GUI_display_status(status_get_status());
-    GUI_display_trigger_level(status_get_trigger_level());
 }
