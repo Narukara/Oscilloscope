@@ -2,6 +2,8 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 
+#include "status.h"
+
 /**
  * ADC1 -> DISABLE
  * Continue to configure ADC1 with adc1_config
@@ -26,7 +28,7 @@ void adc_init() {
                        .ADC_NbrOfChannel = 1,
                    });
     ADC_RegularChannelConfig(ADC2, ADC_Channel_1, 1,
-                             ADC_SampleTime_13Cycles5);  // adjustable
+                             ADC_SampleTime_71Cycles5);  // adjustable
     ADC_Cmd(ADC2, ENABLE);
     ADC_ResetCalibration(ADC2);
     while (ADC_GetResetCalibrationStatus(ADC2) == SET)
@@ -78,9 +80,9 @@ void adc_init() {
 /**
  * ADC1 -> ENABLE
  */
-void adc1_config(uint8_t ADC_SampleTime) {
+void adc1_config(time_base_t time_base) {
     ADC_Cmd(ADC1, DISABLE);
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, (u8)(time_base >> 4));
     ADC_Cmd(ADC1, ENABLE);
 }
 

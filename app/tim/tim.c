@@ -14,6 +14,18 @@
 void tim_init() {
     // TIM2 -> ADC
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    TIM_TimeBaseInit(TIM2, &(TIM_TimeBaseInitTypeDef){
+                               .TIM_Period = 27 - 1,
+                               .TIM_Prescaler = 2000 - 1,
+                               .TIM_ClockDivision = TIM_CKD_DIV1,
+                               .TIM_CounterMode = TIM_CounterMode_Up,
+                           });
+    TIM_OC2Init(TIM2, &(TIM_OCInitTypeDef){
+                          .TIM_OCMode = TIM_OCMode_PWM1,
+                          .TIM_OutputState = TIM_OutputState_Enable,
+                          .TIM_Pulse = 13,
+                          .TIM_OCPolarity = TIM_OCPolarity_Low,
+                      });
 
     // PB1
     GPIO_Init(GPIOB, &(GPIO_InitTypeDef){
@@ -43,18 +55,6 @@ void tim_init() {
  */
 void tim2_set_freq(time_base_t time_base) {
     TIM_Cmd(TIM2, DISABLE);
-    // TODO
-    TIM_TimeBaseInit(TIM2, &(TIM_TimeBaseInitTypeDef){
-                               .TIM_Period = 2800 - 1,
-                               .TIM_Prescaler = 200 - 1,
-                               .TIM_ClockDivision = TIM_CKD_DIV1,
-                               .TIM_CounterMode = TIM_CounterMode_Up,
-                           });
-    TIM_OC2Init(TIM2, &(TIM_OCInitTypeDef){
-                          .TIM_OCMode = TIM_OCMode_PWM1,
-                          .TIM_OutputState = TIM_OutputState_Enable,
-                          .TIM_Pulse = 1400,
-                          .TIM_OCPolarity = TIM_OCPolarity_Low,
-                      });
+    TIM2->PSC = time_base >> 16;
     TIM_Cmd(TIM2, ENABLE);
 }

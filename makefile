@@ -2,14 +2,14 @@ CC = arm-none-eabi-gcc -mthumb -mcpu=cortex-m3 -g -Wall -Wextra -O2
 LINK = -specs=nano.specs -specs=nosys.specs -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=build/target.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x80 -Wl,--start-group -lc -lm -Wl,--end-group
 SRC = *.c lib/*.c app/**/*.c
 HEAD = *.h lib/*.h app/**/*.h
-INC = -I . -I lib -I app/adc -I app/GUI -I app/ILI9341 -I app/spi -I app/status -I app/systick -I app/tim -I app/uart
+INC = -I . -I lib -I app/adc -I app/GUI -I app/ILI9341 -I app/spi -I app/status -I app/systick -I app/tim -I app/uart -I app/dma
 PWD = $(shell pwd)
 # 使用不同芯片：更改LD, MACRO, DEVICE, STARTUP
-LD = -T lib/stm32_flash_md.ld
-MACRO = -D USE_STDPERIPH_DRIVER -D STM32F10X_MD
+LD = -T lib/stm32_flash_ld.ld
+MACRO = -D USE_STDPERIPH_DRIVER -D STM32F10X_LD
 # -D USE_FULL_ASSERT
-DEVICE = target/stm32f1x.cfg
-STARTUP = lib/startup_stm32f10x_md.s
+DEVICE = target/stm32f1x.cfg.bak
+STARTUP = lib/startup_stm32f10x_ld.s
 
 # flash: 串口下载, download: stlink下载
 .PHONY: build clean download flash debug size
