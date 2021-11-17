@@ -82,7 +82,8 @@ void adc_init() {
  */
 void adc1_config(time_base_t time_base) {
     ADC_Cmd(ADC1, DISABLE);
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, (u8)(time_base >> 4));
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1,
+                             (u8)((time_base >> 8) & 0x0f));
     ADC_Cmd(ADC1, ENABLE);
 }
 
