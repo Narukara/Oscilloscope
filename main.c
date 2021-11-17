@@ -32,6 +32,14 @@ static void trigger_mode();
  * A10      UART1   RX
  * B1       TIM3    PWM
  *
+ *
+ * B3 has some weird problems, EXTI cannot be triggered
+ * B4       EXTI4   RUN/HOLD
+ * B5       EXTI5   timebase +
+ * B6       EXTI6   timebase -
+ * A10      EXTI10  mode +
+ * A11      EXTI11  mode -
+ *
  * USART1
  * ADC1
  * ADC2
@@ -72,11 +80,12 @@ int main() {
 }
 
 static void oscilloscope_init() {
-    RCC_APB2PeriphClockCmd(
-        RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC,
-        ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
+                               RCC_APB2Periph_GPIOC | RCC_APB2Periph_AFIO,
+                           ENABLE);
     tim_init();
     uart_init();
+    status_init();
     adc_init();
     dma_init();
     spi_init();
@@ -201,3 +210,12 @@ static void trigger_mode() {
 }
 
 void SysTick_Handler(void) {}
+
+#ifdef USE_FULL_ASSERT
+
+void assert_failed(uint8_t* file, uint32_t line) {
+    while (1)
+        ;
+}
+
+#endif

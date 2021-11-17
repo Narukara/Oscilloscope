@@ -22,7 +22,7 @@ build/target.bin : build/target.elf
 build/target.hex : build/target.elf
 	arm-none-eabi-objcopy $< -Oihex $@
 
-build/target.elf : $(SRC) $(STARTUP) $(HEAD)
+build/target.elf : $(SRC) $(STARTUP) $(HEAD) makefile
 	$(CC) -o $@ $(SRC) $(STARTUP) $(INC) $(LD) $(MACRO) $(LINK)
 
 size :
