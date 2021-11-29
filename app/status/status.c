@@ -52,7 +52,7 @@ u8 status_get_trigger_level() {
     return adc2_read() >> 4;
 }
 
-static time_base_t time_base = us100;
+static time_base_t time_base = us200;
 time_base_t status_get_time_base() {
     return time_base;
 }
@@ -62,8 +62,8 @@ time_base_t status_get_time_base() {
  * B4       EXTI4   RUN/HOLD
  * B5       EXTI5   timebase +
  * B6       EXTI6   timebase -
- * A10      EXTI10  mode +
- * A11      EXTI11  mode -
+ * A11      EXTI11  mode +
+ * A12      EXTI12  mode -
  */
 
 void status_init() {
@@ -73,19 +73,19 @@ void status_init() {
                          .GPIO_Speed = GPIO_Speed_2MHz,
                      });
     GPIO_Init(GPIOA, &(GPIO_InitTypeDef){
-                         .GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11,
+                         .GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12,
                          .GPIO_Mode = GPIO_Mode_IPU,
                          .GPIO_Speed = GPIO_Speed_2MHz,
                      });
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource4);
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource5);
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource6);
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource10);
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource11);
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource12);
 
     EXTI_Init(&(EXTI_InitTypeDef){
         .EXTI_Line =
-            EXTI_Line4 | EXTI_Line5 | EXTI_Line6 | EXTI_Line10 | EXTI_Line11,
+            EXTI_Line4 | EXTI_Line5 | EXTI_Line6 | EXTI_Line11 | EXTI_Line12,
         .EXTI_Mode = EXTI_Mode_Interrupt,
         .EXTI_Trigger = EXTI_Trigger_Falling,
         .EXTI_LineCmd = ENABLE,
@@ -141,13 +141,13 @@ void EXTI9_5_IRQHandler(void) {
 }
 
 void EXTI15_10_IRQHandler(void) {
-    if (EXTI_GetITStatus(EXTI_Line10) == SET) {
-        EXTI_ClearFlag(EXTI_Line10);
+    if (EXTI_GetITStatus(EXTI_Line11) == SET) {
+        EXTI_ClearFlag(EXTI_Line11);
         if (mode != 0) {
             mode--;
         }
     } else {
-        EXTI_ClearFlag(EXTI_Line11);
+        EXTI_ClearFlag(EXTI_Line12);
         if (mode != 3) {
             mode++;
         }

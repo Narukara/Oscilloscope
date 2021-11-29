@@ -37,8 +37,8 @@ static void trigger_mode();
  * B4       EXTI4   RUN/HOLD
  * B5       EXTI5   timebase +
  * B6       EXTI6   timebase -
- * A10      EXTI10  mode +
- * A11      EXTI11  mode -
+ * A11      EXTI11  mode +
+ * A12      EXTI12  mode -
  *
  * USART1
  * ADC1
