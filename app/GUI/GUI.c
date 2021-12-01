@@ -268,7 +268,7 @@ void GUI_display_mode(mode_t mode) {
 }
 
 void GUI_display_trigger(trigger_t trigger) {
-    if (trigger == riging_edge) {
+    if (trigger == rising_edge) {
         display_char(40, TOP_Y, 16, 16, font_rising_16_16, CYAN);
     } else {
         display_char(40, TOP_Y, 16, 16, font_falling_16_16, CYAN);

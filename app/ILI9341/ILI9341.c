@@ -228,15 +228,23 @@ void ILI9341_init() {
 
     /**
      * Memory Access Control
-     * 0x08, 0000_1000,
-     * MY MX MV ML = 0
-     * BGR = 1
-     *
+     * MX : X-mirror
+     * MY : Y-mirror
+     * MV : exchange X Y
      * RGB -> BGR Order
+     *
+     * [MY MX MV ML BGR MH 0 0]
+     *
+     * 0x08, 0000_1000,
+     * Normal, BGR
+     *
+     * 0xC8, 1100_1000,
+     * Mirror, BGR
      *
      */
     send_command(0x36);
-    send_data(0x08);
+    send_data(0x08);  // Normal
+    // send_data(0xC8);  // Mirror
 
     // Frame Rate Control (In Normal Mode/Full Colors)
     // Frame Rate: 79Hz

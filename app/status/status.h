@@ -21,7 +21,7 @@ typedef enum {
 } coupling_t;
 
 typedef enum {
-    riging_edge,
+    rising_edge,
     falling_edge,
 } trigger_t;
 
