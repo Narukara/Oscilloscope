@@ -5,6 +5,19 @@
 #include "adc.h"
 #include "status.h"
 
+/**
+ * In pull up
+ *
+ * B7   cp_AC
+ * B8   cp_DC
+ *
+ * B12  vsen_0.1
+ * B13  vsen_x5
+ * B14  vsen_x2
+ * 
+ * B15  trigger_rise
+ */
+
 static status_t status = RUN;
 status_t status_get_status() {
     return status;
@@ -26,22 +39,47 @@ mode_t status_get_mode() {
  * real time
  */
 coupling_t status_get_coupling() {
-    return AC_coupling;  // stub
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_7) == 0) {
+        return AC_coupling;
+    } else if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_8) == 0) {
+        return DC_coupling;
+    } else {
+        return GND_coupling;
+    }
 }
 
 /**
  * Vertical sensitivity
  * real time
+ *
+ * B12  vsen_0.1
+ * B13  vsen_x5
+ * B14  vsen_x2
  */
 v_sen_t status_get_v_sen() {
-    return V1;  // stub
+    v_sen_t vsen;
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_13) == 0) {
+        vsen = 5;
+    } else if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_14) == 0) {
+        vsen = 2;
+    } else {
+        vsen = 1;
+    }
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12) != 0) {
+        vsen <<= 4;
+    }
+    return vsen;
 }
 
 /**
  * real time
  */
 trigger_t status_get_trigger() {
-    return riging_edge;  // stub
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_15) == 0) {
+        return rising_edge;
+    } else {
+        return falling_edge;
+    }
 }
 
 /**
@@ -68,7 +106,9 @@ time_base_t status_get_time_base() {
 
 void status_init() {
     GPIO_Init(GPIOB, &(GPIO_InitTypeDef){
-                         .GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6,
+                         .GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 |
+                                     GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_12 |
+                                     GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15,
                          .GPIO_Mode = GPIO_Mode_IPU,
                          .GPIO_Speed = GPIO_Speed_2MHz,
                      });

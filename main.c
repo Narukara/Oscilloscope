@@ -32,13 +32,19 @@ static void trigger_mode();
  * A10      UART1   RX
  * B1       TIM3    PWM
  *
- *
- * B3 has some weird problems, EXTI cannot be triggered
+ * B3 has some weird problems
  * B4       EXTI4   RUN/HOLD
  * B5       EXTI5   timebase +
  * B6       EXTI6   timebase -
  * A11      EXTI11  mode +
  * A12      EXTI12  mode -
+ * 
+ * B7   cp_AC
+ * B8   cp_DC
+ * B12  vsen_0.1
+ * B13  vsen_x5
+ * B14  vsen_x2
+ * B15  trigger_rise
  *
  * USART1
  * ADC1
@@ -151,7 +157,7 @@ static u8 update() {
 static void roll_mode() {}
 
 static u16 check_waveform(const u8* data) {
-    if (trigger == riging_edge) {
+    if (trigger == rising_edge) {
         for (u16 i = 159; i < BUF_SIZE - 159; i++) {
             if (data[i] < trigger_level) {
                 for (i++; i < BUF_SIZE - 159; i++) {
