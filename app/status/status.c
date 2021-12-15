@@ -151,9 +151,20 @@ void status_init() {
     });
 }
 
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+/**
+ * 
+ */
+static void simple_delay() {
+    for (u32 i = 0; i < 20000; i++)
+        ;
+}
+#pragma GCC pop_options
+
 void EXTI4_IRQHandler(void) {
     EXTI_ClearFlag(EXTI_Line4);
-    // delay
+    simple_delay();
     if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_4) == 0) {
         if (status == RUN) {
             status = HOLD;
@@ -170,6 +181,7 @@ static const time_base_t time_base_list[] = {
 
 void EXTI9_5_IRQHandler(void) {
     u8 id = (time_base >> 12) & 0x0f;
+    simple_delay();
     if (EXTI_GetITStatus(EXTI_Line5) == SET) {
         EXTI_ClearFlag(EXTI_Line5);
         if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5) == 0) {
@@ -200,6 +212,7 @@ void EXTI9_5_IRQHandler(void) {
 }
 
 void EXTI15_10_IRQHandler(void) {
+    simple_delay();
     if (EXTI_GetITStatus(EXTI_Line11) == SET) {
         EXTI_ClearFlag(EXTI_Line11);
         if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_11) == 0) {
