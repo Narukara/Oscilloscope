@@ -5,5 +5,6 @@
 
 void tim_init();
 void tim2_set_freq(time_base_t time_base);
+void tim2_disable();
 
 #endif

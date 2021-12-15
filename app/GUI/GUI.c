@@ -132,40 +132,49 @@ static void display_multi_char_8_16(u16 offset_x,
     }
 }
 
+static u8 last_data[320] = {0};  // 0-200
 /**
  * @brief This function will record the last waveform, and clear
  * the previous one when the next waveform is displayed.
  * @param data length = 320, range 0-255
  */
 void GUI_display_waveform(const u8* data) {
-    static u8 last_data[320] = {0xff};  // 0-200
     if (status_get_status() == HOLD) {
         return;
     }
+    // set end point
     ILI9341_set_y(0, 0xEF);
     ILI9341_set_x(0, 0x13F);
-    if (last_data[0] != 0xff) {
-        // clear last waveform, display persent
-        for (u16 t = 0; t < 320; t++) {
-            ILI9341_set_y_begin(219 - last_data[t]);
-            ILI9341_set_x_begin(t);
-            ILI9341_begin_write();
-            ILI9341_set_pixel(get_grid(t, 200 - last_data[t]));
-            last_data[t] = _255_to_200(data[t]);
-            ILI9341_set_y_begin(219 - last_data[t]);
-            ILI9341_begin_write();
-            ILI9341_set_pixel(YELLOW);
-        }
-    } else {
-        // initial waveform
-        for (u16 t = 0; t < 320; t++) {
-            last_data[t] = _255_to_200(data[t]);
-            ILI9341_set_y_begin(219 - last_data[t]);
-            ILI9341_set_x_begin(t);
-            ILI9341_begin_write();
-            ILI9341_set_pixel(YELLOW);
-        }
+    // clear last waveform, display persent
+    for (u16 t = 0; t < 320; t++) {
+        ILI9341_set_y_begin(219 - last_data[t]);
+        ILI9341_set_x_begin(t);
+        ILI9341_begin_write();
+        ILI9341_set_pixel(get_grid(t, 200 - last_data[t]));
+        last_data[t] = _255_to_200(data[t]);
+        ILI9341_set_y_begin(219 - last_data[t]);
+        ILI9341_begin_write();
+        ILI9341_set_pixel(YELLOW);
     }
+}
+
+/**
+ * @brief display only one point
+ * @param data 0-255
+ * @param t 0-319
+ */
+void GUI_display_waveform_point(u8 data, u16 t) {
+    if (status_get_status() == HOLD) {
+        return;
+    }
+    ILI9341_set_y(219 - last_data[t], 0xEF);
+    ILI9341_set_x(t, t);
+    ILI9341_begin_write();
+    ILI9341_set_pixel(get_grid(t, 200 - last_data[t]));
+    last_data[t] = _255_to_200(data);
+    ILI9341_set_y_begin(219 - last_data[t]);
+    ILI9341_begin_write();
+    ILI9341_set_pixel(YELLOW);
 }
 
 #define BOTTOM_Y 222
@@ -333,6 +342,13 @@ void GUI_init() {
     ILI9341_set_x(BAR_BEGIN, BAR_BEGIN + 100);
     ILI9341_begin_write();
     for (u16 i = 0; i < 101; i++) {
+        ILI9341_set_pixel(CYAN);
+    }
+    ILI9341_set_y(BAR_TOP_Y + 8, BAR_TOP_Y + 8);
+    ILI9341_set_x(0, 0x13F);
+    for (u8 i = 0; i <= 100; i += 10) {
+        ILI9341_set_x_begin(BAR_BEGIN + i);
+        ILI9341_begin_write();
         ILI9341_set_pixel(CYAN);
     }
 }

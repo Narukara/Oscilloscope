@@ -5,6 +5,7 @@
 
 void dma_init();
 void dma_set(const u8* buffer, u16 buffer_size);
+void dma_disable();
 u8 dma_finish();
 
 #endif

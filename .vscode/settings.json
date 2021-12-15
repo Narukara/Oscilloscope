@@ -4,6 +4,7 @@
         "systick.h": "c",
         "stm32f10x_spi.h": "c",
         "stm32f10x_usart.h": "c",
-        "status.h": "c"
+        "status.h": "c",
+        "stdint.h": "c"
     }
 }

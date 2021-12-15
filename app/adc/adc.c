@@ -82,9 +82,34 @@ void adc_init() {
  */
 void adc1_config(time_base_t time_base) {
     ADC_Cmd(ADC1, DISABLE);
+    u8 id = (time_base >> 12) & 0x0f;
+    ADC_Init(ADC1, &(ADC_InitTypeDef){
+                       .ADC_Mode = ADC_Mode_Independent,
+                       .ADC_ScanConvMode = DISABLE,
+                       .ADC_ContinuousConvMode = (id != 13) ? DISABLE : ENABLE,
+                       .ADC_ExternalTrigConv = (id > 3 && id < 13)
+                                                   ? ADC_ExternalTrigConv_T2_CC2
+                                                   : ADC_ExternalTrigConv_None,
+                       .ADC_DataAlign = ADC_DataAlign_Left,
+                       .ADC_NbrOfChannel = 1,
+                   });
     ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1,
                              (u8)((time_base >> 8) & 0x0f));
     ADC_Cmd(ADC1, ENABLE);
+    if (id == 13) {
+        ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    }
+}
+
+void adc1_disable() {
+    ADC_Cmd(ADC1, DISABLE);
+}
+
+u8 adc1_read() {
+    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET)
+        ;
+    return *((volatile u8*)0x4001244D);
 }
 
 /**
