@@ -32,6 +32,10 @@ void dma_set(const u8* buffer, u16 buffer_size) {
     DMA_Cmd(DMA1_Channel1, ENABLE);
 }
 
+void dma_disable(){
+    DMA_Cmd(DMA1_Channel1, DISABLE);
+}
+
 /**
  * @return 1 if finish
  */

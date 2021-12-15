@@ -7,6 +7,7 @@
 
 void GUI_init();
 void GUI_display_waveform(const u8* data);
+void GUI_display_waveform_point(u8 data, u16 t);
 void GUI_display_v_sen(v_sen_t v_sen);
 void GUI_display_coupling(coupling_t coupling);
 void GUI_display_time_base(time_base_t time_base);

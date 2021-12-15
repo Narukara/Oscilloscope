@@ -15,7 +15,7 @@ void tim_init() {
     // TIM2 -> ADC
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
     TIM_TimeBaseInit(TIM2, &(TIM_TimeBaseInitTypeDef){
-                               .TIM_Period = 27 - 1,
+                               .TIM_Period = 28 - 1,
                                .TIM_Prescaler = 2000 - 1,
                                .TIM_ClockDivision = TIM_CKD_DIV1,
                                .TIM_CounterMode = TIM_CounterMode_Up,
@@ -57,4 +57,8 @@ void tim2_set_freq(time_base_t time_base) {
     TIM_Cmd(TIM2, DISABLE);
     TIM2->PSC = time_base >> 16;
     TIM_Cmd(TIM2, ENABLE);
+}
+
+void tim2_disable(){
+    TIM_Cmd(TIM2, DISABLE);
 }

@@ -14,7 +14,7 @@
  * B12  vsen_0.1
  * B13  vsen_x5
  * B14  vsen_x2
- * 
+ *
  * B15  trigger_rise
  */
 
@@ -87,7 +87,7 @@ trigger_t status_get_trigger() {
  * @return trigger level 0-255
  */
 u8 status_get_trigger_level() {
-    return adc2_read() >> 4;
+    return 255 - (adc2_read() >> 4);
 }
 
 static time_base_t time_base = us200;
@@ -153,10 +153,13 @@ void status_init() {
 
 void EXTI4_IRQHandler(void) {
     EXTI_ClearFlag(EXTI_Line4);
-    if (status == RUN) {
-        status = HOLD;
-    } else {
-        status = RUN;
+    // delay
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_4) == 0) {
+        if (status == RUN) {
+            status = HOLD;
+        } else {
+            status = RUN;
+        }
     }
 }
 
@@ -169,13 +172,29 @@ void EXTI9_5_IRQHandler(void) {
     u8 id = (time_base >> 12) & 0x0f;
     if (EXTI_GetITStatus(EXTI_Line5) == SET) {
         EXTI_ClearFlag(EXTI_Line5);
-        if (id != 0) {
-            time_base = time_base_list[id - 1];
+        if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5) == 0) {
+            if (mode != ROLL) {
+                if (id != 4) {
+                    time_base = time_base_list[id - 1];
+                }
+            } else {
+                if (id != 0) {
+                    time_base = time_base_list[id - 1];
+                }
+            }
         }
     } else {
         EXTI_ClearFlag(EXTI_Line6);
-        if (id != 13) {
-            time_base = time_base_list[id + 1];
+        if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0) {
+            if (mode != ROLL) {
+                if (id != 13) {
+                    time_base = time_base_list[id + 1];
+                }
+            } else {
+                if (id != 3) {
+                    time_base = time_base_list[id + 1];
+                }
+            }
         }
     }
 }
@@ -183,13 +202,27 @@ void EXTI9_5_IRQHandler(void) {
 void EXTI15_10_IRQHandler(void) {
     if (EXTI_GetITStatus(EXTI_Line11) == SET) {
         EXTI_ClearFlag(EXTI_Line11);
-        if (mode != 0) {
-            mode--;
+        if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_11) == 0) {
+            if (mode != 0) {
+                mode--;
+            }
         }
     } else {
         EXTI_ClearFlag(EXTI_Line12);
-        if (mode != 3) {
-            mode++;
+        if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_12) == 0) {
+            if (mode != 3) {
+                mode++;
+            }
+        }
+    }
+    u8 id = (time_base >> 12) & 0x0f;
+    if (mode != ROLL) {
+        if (id <= 3) {
+            time_base = us200;
+        }
+    } else {
+        if (id > 3) {
+            time_base = ms50;
         }
     }
 }

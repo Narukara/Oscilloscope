@@ -38,7 +38,7 @@ static void trigger_mode();
  * B6       EXTI6   timebase -
  * A11      EXTI11  mode +
  * A12      EXTI12  mode -
- * 
+ *
  * B7   cp_AC
  * B8   cp_DC
  * B12  vsen_0.1
@@ -78,10 +78,6 @@ int main() {
         } else {
             roll_mode();
         }
-    }
-    while (1) {
-        __DSB();
-        __WFI();
     }
 }
 
@@ -154,14 +150,42 @@ static u8 update() {
     return ret;
 }
 
-static void roll_mode() {}
+static const u16 roll_Time[] = {25000, 10000, 5000, 2500};
+static volatile u8 roll_start = 0;
+
+static void roll_mode() {
+    adc1_config(time_base);
+    u8 id = (time_base >> 12) & 0x0f;
+    systick_set_interrupt_us(roll_Time[id]);
+    u16 roll_t = 0;
+    while (1) {
+        while (roll_start == 0) {
+            __DSB();
+            __WFI();
+        }
+        roll_start = 0;
+        GUI_display_waveform_point(adc1_read(), roll_t++);
+        if (roll_t == 320) {
+            roll_t = 0;
+        }
+        if (update() || mode != ROLL) {
+            systick_reset_interrupt();
+            adc1_disable();
+            return;
+        }
+    }
+}
+
+void SysTick_Handler() {
+    roll_start = 1;
+}
 
 static u16 check_waveform(const u8* data) {
     if (trigger == rising_edge) {
         for (u16 i = 159; i < BUF_SIZE - 159; i++) {
             if (data[i] < trigger_level) {
                 for (i++; i < BUF_SIZE - 159; i++) {
-                    if (data[i] >= trigger_level) {
+                    if (data[i] > trigger_level) {
                         return i - 160;
                     }
                 }
@@ -171,7 +195,7 @@ static u16 check_waveform(const u8* data) {
         for (u16 i = 159; i < BUF_SIZE - 159; i++) {
             if (data[i] > trigger_level) {
                 for (i++; i < BUF_SIZE - 159; i++) {
-                    if (data[i] <= trigger_level) {
+                    if (data[i] < trigger_level) {
                         return i - 160;
                     }
                 }
@@ -203,7 +227,9 @@ static void trigger_mode() {
             GUI_display_waveform(for_cpu);
         }
         if (update() || mode == ROLL) {
-            // stop adc, tim, dma
+            tim2_disable();
+            adc1_disable();
+            dma_disable();
             return;
         }
         while (dma_finish() == 0)
@@ -214,8 +240,6 @@ static void trigger_mode() {
         for_cpu = temp;
     }
 }
-
-void SysTick_Handler(void) {}
 
 #ifdef USE_FULL_ASSERT
 

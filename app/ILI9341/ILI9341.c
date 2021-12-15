@@ -243,8 +243,8 @@ void ILI9341_init() {
      *
      */
     send_command(0x36);
-    send_data(0x08);  // Normal
-    // send_data(0xC8);  // Mirror
+    // send_data(0x08);  // Normal
+    send_data(0xC8);  // Mirror
 
     // Frame Rate Control (In Normal Mode/Full Colors)
     // Frame Rate: 79Hz
