@@ -161,7 +161,7 @@ static void roll_mode() {
     while (1) {
         while (roll_start == 0) {
             __DSB();
-            __WFI();
+            __WFE();
         }
         roll_start = 0;
         GUI_display_waveform_point(adc1_read(), roll_t++);
@@ -211,8 +211,10 @@ static void trigger_mode() {
     adc1_config(time_base);
     tim2_set_freq(time_base);
     dma_set(for_cpu, BUF_SIZE);
-    while (dma_finish() == 0)
-        ;
+    while (dma_finish() == 0) {
+        __DSB();
+        __WFE();
+    }
     while (1) {
         dma_set(for_adc, BUF_SIZE);
         u16 result = check_waveform(for_cpu);
@@ -232,8 +234,10 @@ static void trigger_mode() {
             dma_disable();
             return;
         }
-        while (dma_finish() == 0)
-            ;
+        while (dma_finish() == 0) {
+            __DSB();
+            __WFE();
+        }
         // exchange
         u8* temp = for_adc;
         for_adc = for_cpu;
