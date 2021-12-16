@@ -154,7 +154,7 @@ void status_init() {
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 /**
- * 
+ * switch bounce
  */
 static void simple_delay() {
     for (u32 i = 0; i < 20000; i++)
