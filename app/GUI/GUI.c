@@ -17,10 +17,8 @@
  * Magic code!
  * Linearly map 0-255 to 0-200, and round up
  */
-static u8 _255_to_200(u8 num) {
-    u16 temp = num * 400 / 255;
-    temp += temp & 0x01;
-    return temp >> 1;
+static inline u8 _255_to_200(u8 num) {
+    return (200 * (u16)num + 127) / 255;
 }
 
 #define MOD_METHOD
