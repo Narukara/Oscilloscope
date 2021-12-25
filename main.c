@@ -11,11 +11,6 @@
 #include "tim.h"
 #include "uart.h"
 
-static void oscilloscope_init();
-static u8 update();
-static void roll_mode();
-static void trigger_mode();
-
 /**
  * ALL Resource
  *
@@ -54,10 +49,6 @@ static void trigger_mode();
  * TIM3
  */
 
-#define BUF_SIZE 1000
-static u8 buffer1[BUF_SIZE];
-static u8 buffer2[BUF_SIZE];
-
 // Non-existent initial value
 static mode_t mode = -1;
 static time_base_t time_base = 0;
@@ -65,7 +56,12 @@ static status_t status = -1;
 static coupling_t coupling = -1;
 static v_sen_t v_sen = -1;
 static trigger_t trigger = -1;
-static u8 trigger_level = 0;
+static u8 trigger_level = 0;  // this may happen, but it's not a serious problem
+
+static void oscilloscope_init();
+static u8 update();
+static void roll_mode();
+static void trigger_mode();
 
 int main() {
     SCB->CCR |=
@@ -150,7 +146,9 @@ static u8 update() {
     return ret;
 }
 
-static const u16 roll_Time[] = {25000, 10000, 5000, 2500};
+/******* ROLL MODE *******/
+
+static const u16 roll_Time[] = {25000, 10000, 5000, 2500};  // us
 static volatile u8 roll_start = 0;
 
 static void roll_mode() {
@@ -180,6 +178,18 @@ void SysTick_Handler() {
     roll_start = 1;
 }
 
+/******* TRIGGER MODE *******/
+/** include AUTO, NORMAL, SIGNLE **/
+
+#define BUF_SIZE 1000
+static u8 buffer1[BUF_SIZE];
+static u8 buffer2[BUF_SIZE];
+
+/**
+ * @param data
+ * @brief check whether there is a waveform that meets the trigger conditions
+ * @return index of trigger point. if tigger fails, return 0xffff
+ */
 static u16 check_waveform(const u8* data) {
     if (trigger == rising_edge) {
         for (u16 i = 159; i < BUF_SIZE - 159; i++) {
@@ -206,27 +216,27 @@ static u16 check_waveform(const u8* data) {
 }
 
 static void trigger_mode() {
-    u8* for_adc = buffer1;
-    u8* for_cpu = buffer2;
+    u8* buf_adc = buffer1;
+    u8* buf_cpu = buffer2;
     adc1_config(time_base);
     tim2_set_freq(time_base);
-    dma_set(for_cpu, BUF_SIZE);
+    dma_set(buf_cpu, BUF_SIZE);
     while (dma_finish() == 0) {
         __DSB();
         __WFE();
     }
     while (1) {
-        dma_set(for_adc, BUF_SIZE);
-        u16 result = check_waveform(for_cpu);
+        dma_set(buf_adc, BUF_SIZE);
+        u16 result = check_waveform(buf_cpu);
         if (result != 0xffff) {
-            GUI_display_waveform(for_cpu + result);
+            GUI_display_waveform(buf_cpu + result);
             if (mode == SINGLE) {
                 status = HOLD;
                 status_set_status();
                 GUI_display_status(status);
             }
         } else if (mode == AUTO) {
-            GUI_display_waveform(for_cpu);
+            GUI_display_waveform(buf_cpu);
         }
         if (update() || mode == ROLL) {
             tim2_disable();
@@ -239,9 +249,9 @@ static void trigger_mode() {
             __WFE();
         }
         // exchange
-        u8* temp = for_adc;
-        for_adc = for_cpu;
-        for_cpu = temp;
+        u8* temp = buf_adc;
+        buf_adc = buf_cpu;
+        buf_cpu = temp;
     }
 }
 
