@@ -3,9 +3,9 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}",
-                "${workspaceFolder}/app/**",
-                "${workspaceFolder}/lib"
+                "${workspaceFolder}/*",
+                "${workspaceFolder}/lib/*",
+                "${workspaceFolder}/app/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
