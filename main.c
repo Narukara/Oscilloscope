@@ -28,17 +28,18 @@
  * B1       TIM3    PWM
  *
  * B3 has some weird problems
- * B4       EXTI4   RUN/HOLD
+ * A11, A12         USB
+ * B4       EXTI4   mode -
  * B5       EXTI5   timebase +
  * B6       EXTI6   timebase -
- * A11      EXTI11  mode +
- * A12      EXTI12  mode -
+ * B7       EXTI7   RUN/HOLD
+ * A15      EXTI15  mode +
  *
- * B7   cp_AC
  * B8   cp_DC
- * B12  vsen_0.1
- * B13  vsen_x5
- * B14  vsen_x2
+ * B9   cp_AC
+ * B12  vsen_x5
+ * B13  vsen_x2
+ * B14  vsen_0.1
  * B15  trigger_rise
  *
  * USART1
