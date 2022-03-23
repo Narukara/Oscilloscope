@@ -258,7 +258,11 @@ static void trigger_mode() {
 
 #ifdef USE_FULL_ASSERT
 
+#define UNUSED(X) (void)X  // To avoid gcc warnings
+
 void assert_failed(uint8_t* file, uint32_t line) {
+    UNUSED(file);
+    UNUSED(line);
     while (1)
         ;
 }
