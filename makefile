@@ -18,7 +18,7 @@ TARGET = STM32F103C8
 ifeq ($(TARGET),STM32F103C6)
 	LD = -T lib/stm32_flash_ld.ld
 	MACRO = -D USE_STDPERIPH_DRIVER -D STM32F10X_LD
-	DEVICE = target/stm32f1x.cfg.bak
+	DEVICE = target/stm32f1x.cfg
 	STARTUP = lib/startup_stm32f10x_ld.s
 endif
 
