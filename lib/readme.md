@@ -1,0 +1,27 @@
+Put the STM32 standard library here!
+
+- core_cm3.c
+- core_cm3.h
+- misc.c
+- misc.h
+- startup_stm32f10x_ld.s  or  startup_stm32f10x_md.s
+- stm32f10x_adc.c
+- stm32f10x_adc.h
+- stm32f10x_dma.c
+- stm32f10x_dma.h
+- stm32f10x_exti.c
+- stm32f10x_exti.h
+- stm32f10x_gpio.c
+- stm32f10x_gpio.h
+- stm32f10x.h
+- stm32f10x_rcc.c
+- stm32f10x_rcc.h
+- stm32f10x_spi.c
+- stm32f10x_spi.h
+- stm32f10x_tim.c
+- stm32f10x_tim.h
+- stm32f10x_usart.c
+- stm32f10x_usart.h
+- stm32_flash_ld.ld  or  stm32_flash_md.ld
+- system_stm32f10x.c
+- system_stm32f10x.h
